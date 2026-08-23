@@ -1,0 +1,51 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>dev.gaphunter.nplusonequerycompanion</id>
+    <name>N+1 Query Companion</name>
+    <vendor>Gap Hunter Labs</vendor>
+    <description><![CDATA[
+        <p>Gutter icon on any Java/Kotlin <code>for</code> loop whose body
+        accesses a lazy-loaded JPA association (<code>@OneToMany</code>/
+        <code>@ManyToMany</code> by default, or <code>@ManyToOne</code>/
+        <code>@OneToOne</code> with an explicit
+        <code>fetch = FetchType.LAZY</code>) directly on the raw loop
+        variable -- the classic N+1 query shape: fetch a collection, then
+        trigger one extra query per element while iterating it.</p>
+        <p>Unlike a pure hover/visualization tool, the tooltip names the
+        exact association and annotation responsible so the fix (an
+        explicit <code>JOIN FETCH</code>/<code>@EntityGraph</code>, or an
+        eager fetch where that's the right trade-off) is obvious at the
+        exact loop that needs it.</p>
+        <p><b>100% static PSI analysis</b> -- matches JPA annotations by
+        simple name only, so it works whether the real
+        <code>jakarta.persistence</code>/<code>javax.persistence</code> jar
+        is on the classpath or not. Stated honestly: v0.1 only checks
+        direct access on the raw loop variable (a variable derived from it
+        isn't matched yet), and only classic <code>for</code>/<code>for
+        (x in y)</code> loops, not <code>.forEach</code>/stream chains --
+        real, documented limitations, not bugs.</p>
+        <p>Free. No license nags, no telemetry, no network calls.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <!-- Required since the Kotlin plugin's K2 mode became the default: without this,
+         the whole plugin silently fails to load (SDK_GOTCHAS.md SS3). Every Kotlin-side
+         class here (KotlinLoopAssociationFinder, KotlinAssociationAnnotations) only walks
+         structural PSI and resolves references via the plain PsiElement.references API
+         (never mainReference/BindingContext/ResolutionFacade), the same discipline already
+         proven safe under both K1 and K2 by turbo-log-companion's StatementFinder and
+         api-security-companion's KotlinTypeAnnotationResolver. -->
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK1="true" supportsK2="true"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language="JAVA"
+            implementationClass="dev.gaphunter.nplusonequerycompanion.gutter.NPlusOneLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="kotlin"
+            implementationClass="dev.gaphunter.nplusonequerycompanion.gutter.NPlusOneLineMarkerProvider"/>
+    </extensions>
+</idea-plugin>
