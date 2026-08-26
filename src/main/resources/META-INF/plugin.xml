@@ -47,5 +47,6 @@
             implementationClass="dev.gaphunter.nplusonequerycompanion.gutter.NPlusOneLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="kotlin"
             implementationClass="dev.gaphunter.nplusonequerycompanion.gutter.NPlusOneLineMarkerProvider"/>
+        <notificationGroup id="N+1 Query Companion" displayType="BALLOON"/>
     </extensions>
 </idea-plugin>

@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElement
 import dev.gaphunter.nplusonequerycompanion.detect.JavaLoopAssociationFinder
 import dev.gaphunter.nplusonequerycompanion.detect.KotlinLoopAssociationFinder
 import dev.gaphunter.nplusonequerycompanion.model.LoopAssociationHit
+import dev.gaphunter.nplusonequerycompanion.review.ReviewPrompt
 
 /**
  * Gutter icon on the `for`/`for (x in y)` keyword of any loop whose body
@@ -40,6 +41,10 @@ class NPlusOneLineMarkerProvider : LineMarkerProviderDescriptor(), DumbAware {
         for (element in elements) {
             val hit = hitsByKeyword[element] ?: continue
             result.add(buildMarker(hit))
+
+            val path = file.virtualFile?.path ?: continue
+            val lineNumber = file.viewProvider.document?.getLineNumber(element.textRange.startOffset) ?: -1
+            ReviewPrompt.recordHit(file.project, "$path:$lineNumber")
         }
     }
 
