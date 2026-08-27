@@ -16,7 +16,7 @@ import dev.gaphunter.nplusonequerycompanion.review.ReviewPrompt
  * or `@ManyToOne`/`@OneToOne` with an explicit `fetch = FetchType.LAZY`)
  * directly on the raw loop variable -- the classic N+1 query shape.
  *
- * **Leaf-anchored from the start** (`SDK_GOTCHAS.md` §20): both finders
+ * **Leaf-anchored from the start**: both finders
  * already hand back the real keyword leaf token
  * ([LoopAssociationHit.loopKeyword] -- Java's `PsiForeachStatement.firstChild`,
  * Kotlin's `KtForExpression.forKeyword`), so no extra leaf-descent is

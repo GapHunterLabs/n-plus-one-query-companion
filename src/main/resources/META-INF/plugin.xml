@@ -32,7 +32,7 @@
     <depends>org.jetbrains.kotlin</depends>
 
     <!-- Required since the Kotlin plugin's K2 mode became the default: without this,
-         the whole plugin silently fails to load (SDK_GOTCHAS.md SS3). Every Kotlin-side
+         the whole plugin silently fails to load. Every Kotlin-side
          class here (KotlinLoopAssociationFinder, KotlinAssociationAnnotations) only walks
          structural PSI and resolves references via the plain PsiElement.references API
          (never mainReference/BindingContext/ResolutionFacade), the same discipline already
