@@ -162,6 +162,123 @@ class JavaLoopAssociationFinderTest : BasePlatformTestCase() {
         assertTrue(JavaLoopAssociationFinder.findAll(file).isEmpty())
     }
 
+    fun `test v0-2 -- association access inside a same-class helper method, one hop, is flagged`() {
+        addCustomerEntity("@OneToMany")
+        val file = myFixture.configureByText(
+            "Report.java",
+            """
+            import java.util.List;
+            class Report {
+                void run(List<Customer> customers) {
+                    for (Customer c : customers) {
+                        process(c);
+                    }
+                }
+
+                void process(Customer customer) {
+                    customer.getOrders();
+                }
+            }
+            """.trimIndent(),
+        )
+        val hits = JavaLoopAssociationFinder.findAll(file)
+        assertEquals(1, hits.size)
+        assertEquals("orders", hits[0].accesses[0].displayName)
+    }
+
+    fun `test v0-2 -- explicit this qualifier on the helper call is also followed`() {
+        addCustomerEntity("@OneToMany")
+        val file = myFixture.configureByText(
+            "Report.java",
+            """
+            import java.util.List;
+            class Report {
+                void run(List<Customer> customers) {
+                    for (Customer c : customers) {
+                        this.process(c);
+                    }
+                }
+
+                void process(Customer customer) {
+                    customer.getOrders();
+                }
+            }
+            """.trimIndent(),
+        )
+        val hits = JavaLoopAssociationFinder.findAll(file)
+        assertEquals(1, hits.size)
+    }
+
+    fun `test v0-2 -- a helper that does not access any association is not flagged`() {
+        addCustomerEntity("@OneToMany")
+        val file = myFixture.configureByText(
+            "Report.java",
+            """
+            import java.util.List;
+            class Report {
+                void run(List<Customer> customers) {
+                    for (Customer c : customers) {
+                        process(c);
+                    }
+                }
+
+                void process(Customer customer) {
+                    System.out.println(customer);
+                }
+            }
+            """.trimIndent(),
+        )
+        assertTrue(JavaLoopAssociationFinder.findAll(file).isEmpty())
+    }
+
+    fun `test v0-2 -- a helper call not passing the loop variable is not flagged`() {
+        addCustomerEntity("@OneToMany")
+        val file = myFixture.configureByText(
+            "Report.java",
+            """
+            import java.util.List;
+            class Report {
+                void run(List<Customer> customers) {
+                    for (Customer c : customers) {
+                        logStart();
+                    }
+                }
+
+                void logStart() {
+                    System.out.println("start");
+                }
+            }
+            """.trimIndent(),
+        )
+        assertTrue(JavaLoopAssociationFinder.findAll(file).isEmpty())
+    }
+
+    fun `test v0-2 -- a two-hop chain is never followed, documented scope limit`() {
+        addCustomerEntity("@OneToMany")
+        val file = myFixture.configureByText(
+            "Report.java",
+            """
+            import java.util.List;
+            class Report {
+                void run(List<Customer> customers) {
+                    for (Customer c : customers) {
+                        outer(c);
+                    }
+                }
+
+                void outer(Customer customer) {
+                    inner(customer);
+                }
+
+                void inner(Customer customer) {
+                    customer.getOrders();
+                }
+            }
+            """.trimIndent(),
+        )
+        assertTrue(JavaLoopAssociationFinder.findAll(file).isEmpty())
+    }
+
     fun `test a loop with no association access produces no hits and no crash`() {
         val file = myFixture.configureByText(
             "Report.java",

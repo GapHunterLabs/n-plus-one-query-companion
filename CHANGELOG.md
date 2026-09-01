@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Added
+
+- Java: follows exactly ONE method-call hop into a same-class helper
+  method the loop body calls (no qualifier, or explicit `this.`),
+  passing the loop's iteration variable as an argument -- if the
+  helper's own corresponding parameter accesses a lazy association,
+  that's flagged too, not just direct inline access. Never follows a
+  chain of two or more hops.
+
 ## [0.1.1]
 
 ### Added
@@ -27,6 +38,7 @@
 - 100% static PSI analysis, Java and Kotlin, no network calls, no
   telemetry. Free.
 
-[Unreleased]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/n-plus-one-query-companion/commits/0.1.0
