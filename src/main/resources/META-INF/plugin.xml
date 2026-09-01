@@ -16,6 +16,13 @@
         explicit <code>JOIN FETCH</code>/<code>@EntityGraph</code>, or an
         eager fetch where that's the right trade-off) is obvious at the
         exact loop that needs it.</p>
+        <p><b>v0.2 (Java): one method-call hop into a same-class helper.</b>
+        <code>for (Customer c : customers) { process(c); }</code> where
+        <code>process</code>'s own body accesses a lazy association on
+        its corresponding parameter is now flagged too -- the query
+        lives in a helper method rather than inline, exactly how
+        well-factored code tends to look. Bounded to exactly ONE hop, a
+        same-class call only -- never a chain of two or more hops.</p>
         <p><b>100% static PSI analysis</b> -- matches JPA annotations by
         simple name only, so it works whether the real
         <code>jakarta.persistence</code>/<code>javax.persistence</code> jar

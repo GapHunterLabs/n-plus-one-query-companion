@@ -43,13 +43,27 @@ obvious without cross-referencing two places in the file.
   proven in `turbo-log-companion`'s `StatementFinder` and
   `api-security-companion`'s `KotlinTypeAnnotationResolver`.
 
+## v0.2: one method-call hop into a same-class helper (Java)
+
+`for (Customer c : customers) { process(c); }` where `process`'s own
+body accesses a lazy association on its corresponding parameter is now
+flagged too -- the query lives in a helper method rather than inline,
+which is exactly how well-factored code tends to look. Bounded to
+exactly ONE hop, a same-class call only (no qualifier, or an explicit
+`this.` qualifier) -- never follows a chain of two or more hops, and
+never a call whose qualifier is some other object. `JOptimize`
+(Marketplace, confirmed competitor) covers N+1 only via direct
+JPA/Hibernate annotation access, the same depth as this plugin's own
+v0.1 -- this angle is a deeper granularity not confirmed in its
+coverage.
+
 ## v0.1 scope — stated honestly, not exhaustively
 
 - Only the **raw loop variable** is checked. `for (Customer c : customers)
   { Customer copy = c; copy.getOrders(); }` is not flagged — a real
   limitation (would need a small data-flow pass), not a bug.
 - Only classic `for (Type x : collection)` / `for (x in collection)` loops
-  are covered. `.forEach(...)`/stream chains are a v0.2 candidate.
+  are covered. `.forEach(...)`/stream chains are a future-version candidate.
 - No attempt to detect that the N+1 is already fixed via an explicit
   `JOIN FETCH`/`@EntityGraph` in a query string elsewhere — v0.1 only
   reasons about the annotation and the loop shape, not about JPQL/HQL
