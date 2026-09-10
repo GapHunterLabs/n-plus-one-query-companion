@@ -11,6 +11,14 @@ for (Customer c : customers) {
 }
 ```
 
+## Screenshots
+
+![Screenshot 1](docs/screenshots/Screenshot_1.png)
+
+![Screenshot 2](docs/screenshots/Screenshot_2.png)
+
+![Screenshot 3](docs/screenshots/Screenshot_3.png)
+
 ## Why it exists
 
 Static N+1 detection already has a real, paid-adjacent competitor in this
