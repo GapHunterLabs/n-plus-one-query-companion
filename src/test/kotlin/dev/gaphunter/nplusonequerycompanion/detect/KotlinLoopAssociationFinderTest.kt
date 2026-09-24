@@ -148,6 +148,41 @@ class KotlinLoopAssociationFinderTest : BasePlatformTestCase() {
         assertTrue(KotlinLoopAssociationFinder.findAll(file).isEmpty())
     }
 
+    fun `test a shadowed inner loop variable with the same name is not counted against the outer loop`() {
+        // The Kotlin resolver was documented as matching the receiver by
+        // simple NAME TEXT, not by resolving its actual declaration -- a
+        // real false-positive risk whenever an inner scope redeclares a
+        // variable with the same name as an outer loop variable, which
+        // Kotlin's concise style makes common (nested loops/lambdas often
+        // reuse short names like `c`, `it`). Here the inner `for (c in
+        // others)` shadows the outer `c`; the inner loop's own access is a
+        // real, legitimate hit, but the OUTER loop's body never actually
+        // touches an association on ITS `c` -- only text-matching by name
+        // would wrongly attribute the inner loop's access to the outer
+        // loop too, double-counting one real N+1 site as two.
+        addCustomerEntity("@OneToMany")
+        val file = myFixture.configureByText(
+            "Report.kt",
+            """
+            class Report {
+                fun run(customers: List<Customer>, others: List<Customer>) {
+                    for (c in customers) {
+                        for (c in others) {
+                            c.orders
+                        }
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+        val hits = KotlinLoopAssociationFinder.findAll(file)
+        assertEquals(
+            "expected exactly ONE hit (the inner loop's own), not one per loop sharing the shadowed name",
+            1,
+            hits.size,
+        )
+    }
+
     fun `test a loop with no association access produces no hits and no crash`() {
         val file = myFixture.configureByText(
             "Report.kt",
