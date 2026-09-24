@@ -22,8 +22,12 @@ import com.intellij.psi.PsiFile
  * already proven safe under both K1 and K2 elsewhere in this catalog
  * (`turbo-log-companion`'s `StatementFinder.findKotlin`,
  * `api-security-companion`'s `KotlinTypeAnnotationResolver`). The receiver
- * itself is matched by simple name text, never resolved, keeping the
- * "raw loop variable only" v0.1 scope both intentional and cheap.
+ * is resolved to its actual declaration and compared by PSI identity
+ * against the loop's own parameter, same as the Java side's
+ * `qualifier.resolve() != parameter` check -- matching by simple name
+ * text alone was tried first and found to double-count a real N+1 site
+ * whenever an inner scope shadows the loop variable's name (a nested
+ * `for` reusing the same short name, common in idiomatic Kotlin).
  */
 object KotlinLoopAssociationFinder {
 
@@ -41,7 +45,7 @@ object KotlinLoopAssociationFinder {
     }
 
     private fun hitFor(loop: KtForExpression): LoopAssociationHit? {
-        val paramName = loop.loopParameter?.name ?: return null
+        val loopParameter = loop.loopParameter ?: return null
         val body = loop.body ?: return null
         val forKeyword = loop.forKeyword ?: return null
 
@@ -50,8 +54,9 @@ object KotlinLoopAssociationFinder {
             override fun visitDotQualifiedExpression(expression: KtDotQualifiedExpression) {
                 super.visitDotQualifiedExpression(expression)
 
-                val receiverName = (expression.receiverExpression as? KtNameReferenceExpression)?.getReferencedName()
-                if (receiverName != paramName) return
+                val receiverRef = expression.receiverExpression as? KtNameReferenceExpression ?: return
+                val receiverTarget = receiverRef.references.firstNotNullOfOrNull { it.resolve() }
+                if (receiverTarget != loopParameter) return
 
                 val selector = expression.selectorExpression
                 val nameRef: KtNameReferenceExpression = when (selector) {

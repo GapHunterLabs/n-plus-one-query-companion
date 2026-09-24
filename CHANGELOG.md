@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [0.2.1]
+
+### Fixed
+
+- Kotlin: a loop-variable access was matched by comparing the
+  receiver's simple NAME TEXT, not its resolved declaration -- a real
+  false positive whenever an inner scope shadows the loop variable's
+  name (a nested `for` reusing the same short name, common in
+  idiomatic Kotlin): the shadowed inner access got double-counted
+  against the outer loop too, which never actually touched an
+  association on its own variable. Now resolved and compared by PSI
+  identity, matching the Java side's existing discipline.
+
 ## [0.2.0]
 
 ### Added
@@ -38,7 +51,8 @@
 - 100% static PSI analysis, Java and Kotlin, no network calls, no
   telemetry. Free.
 
-[Unreleased]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/GapHunterLabs/n-plus-one-query-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/n-plus-one-query-companion/commits/0.1.0

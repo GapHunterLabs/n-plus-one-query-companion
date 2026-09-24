@@ -21,8 +21,8 @@ for (Customer c : customers) {
 
 ## Why it exists
 
-Static N+1 detection already has a real, paid-adjacent competitor in this
-exact niche: **JPA Fetch Lens** (JetBrains Marketplace, real installs).
+Static N+1 detection already has a real competitor in this exact niche:
+**JPA Fetch Lens** (JetBrains Marketplace, FREE, re-verified 2026-09).
 Reading its published feature list and source confirms it is 100%
 hover/visualization — it shows you where an association *might* fire an
 extra query, but nothing in it marks the loop itself or gives you a
@@ -60,10 +60,12 @@ which is exactly how well-factored code tends to look. Bounded to
 exactly ONE hop, a same-class call only (no qualifier, or an explicit
 `this.` qualifier) -- never follows a chain of two or more hops, and
 never a call whose qualifier is some other object. `JOptimize`
-(Marketplace, confirmed competitor) covers N+1 only via direct
-JPA/Hibernate annotation access, the same depth as this plugin's own
-v0.1 -- this angle is a deeper granularity not confirmed in its
-coverage.
+(Marketplace, a much broader Java/Spring performance+security suite,
+80+ rules, PRO plan re-verified at $4.99/month) covers N+1 only via
+direct JPA/Hibernate annotation access, the same depth as this
+plugin's own v0.1 -- this one-hop angle is a deeper granularity not
+confirmed in its coverage. This plugin stays intentionally narrower
+and free -- a single-purpose N+1 detector, not a broad paid suite.
 
 ## v0.1 scope — stated honestly, not exhaustively
 
